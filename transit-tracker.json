@@ -1,12 +1,56 @@
 {
-  "Earl": [
-    {
-      "nickname": "Parking Garage",
-      "stopId": "st:1_72984"
-    }
-  ],
-  "Ellis": [],
-  "Nickels": [],
-  "Constantine": [],
-  "Balducci": []
+  "Earl": {
+    "location": "U Building",
+    "stops": [
+      {
+        "nickname": "Main Entrance",
+        "stopId": "st:1_68582",
+        "routes": [
+          "st:1_100113",
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
+        ]
+      },
+      {
+        "nickname": "Parking Garage",
+        "stopId": "st:1_72984",
+        "routes": [
+          "st:1_100113",
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
+        ]
+      },
+      {
+        "nickname": "Parking Garage",
+        "stopId": "st:1_72983",
+        "routes": [
+          "st:1_100113",
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
+        ]
+      }
+    ]
+  },
+  "Ellis": {
+    "location": "T Building",
+    "stops": []
+  },
+  "Nickels": {
+    "location": "L Building",
+    "stops": []
+  },
+  "Constantine": {
+    "location": "Library",
+    "stops": []
+  },
+  "Balducci": {
+    "location": "Cafeteria",
+    "stops": []
+  }
 }
