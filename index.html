@@ -1,1 +1,370 @@
-Transit Tracker Config
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Transit Trackers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #mapModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 90%;
+      max-width: 800px;
+      height: 600px;
+      transform: translate(-50%, -50%);
+      background: white;
+      z-index: 1055;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #mapBackdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1050;
+      display: none;
+    }
+    #map {
+      flex: 1;
+    }
+    #mapNote {
+      font-size: 0.875rem;
+      text-align: center;
+      padding: 0.5rem;
+      background: #f8f9fa;
+      border-top: 1px solid #dee2e6;
+    }
+    label {
+      font-weight: bold;
+    }
+    div.card-body {
+      background: #f6f6f6;
+    }
+    div.card-field {
+      padding-bottom: 10px;
+    }
+    .grab-row {
+      display: flex;
+      align-items: stretch;
+      transition: transform 0.2s ease, opacity 0.2s ease;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .grab-row .card {
+      border: none;
+    }
+    .grab-row.drag-over {
+      transform: scale(1.02);
+      opacity: 0.9;
+      z-index: 5;
+    }
+    .grab-handle {
+      cursor: grab;
+      user-select: none;
+      padding: 0 8px;
+      font-size: 20px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+    }
+    .grab-handle:active {
+      cursor: grabbing;
+      background: #ccc;
+    }
+    span.stop-id {
+      font-family: Courier;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Transit Trackers</h1>
+    <button class="btn btn-outline-success" onclick="exportJSON()">Export JSON</button>
+  </div>
+  <ul class="nav nav-tabs" id="tabs"></ul>
+  <div id="views" class="pt-3"></div>
+</div>
+
+<div id="mapBackdrop"></div>
+<div id="mapModal">
+  <div id="map"></div>
+  <div id="mapNote">Tip: Zoom in if you don’t see any pins.</div>
+  <div class="p-2 text-center">
+    <button class="btn btn-sm btn-secondary" onclick="closeMap()">Cancel</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+const trackers = ['Earl', 'Ellis', 'Nickels', 'Constantine', 'Balducci'];
+let state = {};
+let active = trackers[0], currentIndex = null;
+let map, layer;
+let pendingInsertIndex = null;
+
+const tabs = document.getElementById('tabs');
+const views = document.getElementById('views');
+
+trackers.forEach((t, idx) => {
+  const li = document.createElement('li');
+  li.className = 'nav-item';
+  li.innerHTML = `<button class="nav-link${idx === 0 ? ' active' : ''}" data-bs-toggle="tab">${t}</button>`;
+  li.querySelector('button').onclick = () => switchTo(t);
+  tabs.appendChild(li);
+
+  const view = document.createElement('div');
+  view.id = t;
+  view.className = 'tab-pane';
+  views.appendChild(view);
+});
+
+function switchTo(t) {
+  active = t;
+  [...tabs.querySelectorAll('button')].forEach(btn => {
+    btn.classList.toggle('active', btn.textContent === t);
+  });
+  [...views.children].forEach(view => {
+    view.classList.toggle('d-none', view.id !== t);
+  });
+  render();
+}
+
+function render() {
+  const container = document.getElementById(active);
+  container.innerHTML = '';
+
+  const locField = document.createElement('div');
+  locField.className = 'mb-4';
+  locField.innerHTML = `
+    <label class="form-label">Where on campus is this transit tracker?</label>
+    <textarea class="form-control" rows="2" onchange="state['${active}'].location = this.value">${state[active].location || ''}</textarea>
+  `;
+  container.appendChild(locField);
+
+  const stops = state[active].stops || [];
+  if (stops.length === 0) {
+    const msg = document.createElement('div');
+    msg.className = 'text-muted mb-3';
+    msg.textContent = 'No stops configured for this transit tracker.';
+    container.appendChild(msg);
+  }
+
+  stops.forEach((s, i) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'grab-row mb-3';
+    wrapper.dataset.index = i;
+    wrapper.ondragover = e => { e.preventDefault(); wrapper.classList.add('drag-over'); };
+    wrapper.ondragleave = () => wrapper.classList.remove('drag-over');
+    wrapper.ondrop = e => { wrapper.classList.remove('drag-over'); handleDrop(e); };
+
+    const handle = document.createElement('div');
+    handle.className = 'grab-handle';
+    handle.draggable = true;
+    handle.dataset.index = i;
+    handle.textContent = '☰';
+    handle.ondragstart = handleDragStart;
+
+    const card = document.createElement('div');
+    card.className = 'card flex-grow-1';
+    card.innerHTML = `
+      <div class="card-body">
+        <div class="mb-2 card-field">
+          <label class="form-label">Stop Nickname</label>
+          <input type="text" class="form-control" value="${s.nickname}" onchange="state['${active}'].stops[${i}].nickname=this.value">
+        </div>
+        <div class="card-field">
+          <label class="form-label">Stop ID</label><br/>
+          <span class="me-2 stop-id">${s.stopId || '<em>(none)</em>'}</span>
+          <button class="btn btn-sm btn-outline-primary" onclick="pickStop(${i})">Select</button>
+        </div>
+        <div class="routes"></div>
+        <div class="card-field mt-3 text-end">
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteStop(${i})">Delete Stop</button>
+        </div>
+      </div>`;
+
+    wrapper.appendChild(handle);
+    wrapper.appendChild(card);
+    container.appendChild(wrapper);
+    renderRoutes(s, i, card.querySelector('.routes'));
+  });
+
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-dark';
+  btn.textContent = 'Add Stop';
+  btn.onclick = () => pickStop(null);
+  container.appendChild(btn);
+}
+
+function renderRoutes(stop, index, container) {
+  if (!stop.stopId) return;
+  const routeBox = document.createElement('div');
+  routeBox.innerHTML = `<div class="mt-3 mb-2"><strong>Included Routes</strong> <span class="text-muted">(loading...)</span></div>`;
+  container.appendChild(routeBox);
+
+  fetch(`https://tt.horner.tj/stops/${stop.stopId}/routes`)
+    .then(res => res.json())
+    .then(routes => {
+      routeBox.innerHTML = `<div class="mt-3 mb-2"><strong>Included Routes</strong><p>Select the routes to show for this stop.</p></div>`;
+      routes.forEach(r => {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'form-check-input me-2';
+        checkbox.checked = stop.routes?.includes(r.routeId);
+        checkbox.onchange = () => {
+          if (!stop.routes) stop.routes = [];
+          checkbox.checked ? stop.routes.push(r.routeId) : stop.routes = stop.routes.filter(id => id !== r.routeId);
+        };
+
+        const label = document.createElement('label');
+        label.className = 'form-check d-flex align-items-center mb-1';
+        label.style.gap = '0.5rem';
+
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.style.backgroundColor = `#${r.color}`;
+        badge.textContent = r.name;
+
+        const headsigns = document.createElement('small');
+        headsigns.className = 'text-muted';
+        headsigns.textContent = r.headsigns?.join(', ') || '';
+
+        label.appendChild(checkbox);
+        label.appendChild(badge);
+        label.appendChild(headsigns);
+        routeBox.appendChild(label);
+      });
+    });
+}
+
+let dragIndex = null;
+
+function handleDragStart(e) {
+  dragIndex = +e.target.dataset.index;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragIndex);
+  const card = e.target.closest('.grab-row');
+  const clone = card.cloneNode(true);
+  clone.style.position = 'absolute';
+  clone.style.top = '-9999px';
+  clone.style.left = '-9999px';
+  document.body.appendChild(clone);
+  e.dataTransfer.setDragImage(clone, 0, 0);
+  setTimeout(() => document.body.removeChild(clone), 0);
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  const dropIndex = +e.currentTarget.dataset.index;
+  const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+  if (isNaN(fromIndex) || dropIndex === fromIndex) return;
+  const items = state[active].stops;
+  const moved = items.splice(fromIndex, 1)[0];
+  items.splice(dropIndex, 0, moved);
+  render();
+}
+
+function deleteStop(index) {
+  state[active].stops.splice(index, 1);
+  render();
+}
+
+function pickStop(index = null) {
+  currentIndex = index;
+  pendingInsertIndex = index === null ? (state[active].stops?.length || 0) : null;
+  document.getElementById('mapModal').style.display = 'flex';
+  document.getElementById('mapBackdrop').style.display = 'block';
+
+  if (!map) {
+    map = L.map('map').setView([47.58, -122.14], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    layer = L.layerGroup().addTo(map);
+    map.on('moveend', loadStops);
+  }
+  loadStops();
+}
+
+function closeMap() {
+  document.getElementById('mapModal').style.display = 'none';
+  document.getElementById('mapBackdrop').style.display = 'none';
+}
+
+function loadStops() {
+  const b = map.getBounds();
+  const url = `https://tt.horner.tj/stops/within/${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`;
+  fetch(url)
+    .then(r => r.json())
+    .then(stops => {
+      layer.clearLayers();
+      stops.forEach(s => {
+        const marker = L.marker([s.lat, s.lon]).addTo(layer);
+        marker.on('click', () => {
+          const popupContent = document.createElement('div');
+          popupContent.innerHTML = `<strong>${s.name || 'Unnamed Stop'}</strong><br>ID: ${s.stopId}<br>`;
+
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-sm btn-primary mt-2';
+          btn.textContent = 'Select This Stop';
+          btn.onclick = () => {
+            if (!state[active].stops) state[active].stops = [];
+            if (pendingInsertIndex !== null) {
+              state[active].stops.push({ nickname: s.name || '', stopId: s.stopId, routes: [] });
+            } else {
+              const stop = state[active].stops[currentIndex];
+              stop.stopId = s.stopId;
+              if (!stop.nickname || stop.nickname.trim() === '') stop.nickname = s.name || '';
+            }
+            closeMap();
+            render();
+          };
+          popupContent.appendChild(btn);
+          marker.bindPopup(popupContent).openPopup();
+        });
+      });
+    });
+}
+
+function exportJSON() {
+  const output = {};
+  for (const t of trackers) output[t] = state[t];
+  const blob = new Blob([JSON.stringify(output, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'transit-tracker.json';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function init() {
+  fetch('/transit-tracker.json')
+    .then(res => res.json())
+    .then(data => {
+      state = Object.fromEntries(trackers.map(t => {
+        const tracker = data[t] || {};
+        return [t, { location: tracker.location || '', stops: tracker.stops || [] }];
+      }));
+      switchTo(active);
+    })
+    .catch(err => {
+      console.warn('Failed to load config. Starting fresh.');
+      state = Object.fromEntries(trackers.map(t => [t, { location: '', stops: [] }]));
+      switchTo(active);
+    });
+}
+
+init();
+</script>
+
+</body>
+</html>
