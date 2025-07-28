@@ -88,7 +88,10 @@
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">Transit Trackers</h1>
-    <button class="btn btn-outline-success" onclick="exportJSON()">Export JSON</button>
+      <div class="d-flex gap-2">
+        <button id="copyBtn" class="btn btn-outline-success" onclick="copyJSON()">Copy JSON</button>
+        <button class="btn btn-outline-success" onclick="exportJSON()">Export JSON</button>
+      </div>
   </div>
   <ul class="nav nav-tabs" id="tabs"></ul>
   <div id="views" class="pt-3"></div>
@@ -100,6 +103,22 @@
   <div id="mapNote">Tip: Zoom in if you don’t see any pins.</div>
   <div class="p-2 text-center">
     <button class="btn btn-sm btn-secondary" onclick="closeMap()">Cancel</button>
+  </div>
+</div>
+
+<div class="modal fade" id="copyInstructionsModal" tabindex="-1" aria-labelledby="copyModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="copyModalLabel">Copied to Clipboard</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        The configuration has been copied to your clipboard.<br><br>
+        <strong>Next step:</strong><br>
+        <a href="https://github.com/bcsustainability/bcsustainability.github.io/edit/main/transit-tracker.json" target="_blank">Open this GitHub link</a>, paste the JSON, and click <strong>“Commit changes”</strong>. (Login to GitHub if needed)
+      </div>
+    </div>
   </div>
 </div>
 
@@ -344,6 +363,28 @@ function exportJSON() {
   link.download = 'transit-tracker.json';
   link.click();
   URL.revokeObjectURL(url);
+}
+
+function copyJSON() {
+  const btn = document.getElementById('copyBtn');
+  const originalText = btn.textContent;
+
+  navigator.clipboard.writeText(JSON.stringify(state, null, 2)).then(() => {
+    btn.textContent = 'Copied!';
+    btn.disabled = true;
+    btn.classList.remove('btn-outline-success');
+    btn.classList.add('btn-success');
+
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.disabled = false;
+      btn.classList.remove('btn-success');
+      btn.classList.add('btn-outline-success');
+    }, 1500);
+
+    const modal = new bootstrap.Modal(document.getElementById('copyInstructionsModal'));
+    modal.show();
+  });
 }
 
 function init() {
