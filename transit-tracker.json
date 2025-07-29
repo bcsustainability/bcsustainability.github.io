@@ -3,10 +3,14 @@
     "location": "U Building",
     "stops": [
       {
-        "nickname": "Test",
+        "nickname": "Main Entrance",
         "stopId": "st:1_68582",
         "routes": [
-          "st:1_100113"
+          "st:1_100113",
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
         ]
       },
       {
