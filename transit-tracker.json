@@ -1,4 +1,59 @@
 {
+  "Balducci": {
+    "name": "Balducci",
+    "location": "Cafeteria",
+    "stops": []
+  },
+  "98:3D:AE:65:17:40": {
+    "name": "Constantine",
+    "location": "Library",
+    "stops": [
+      {
+        "nickname": "South Entrance",
+        "stopId": "st:1_79878",
+        "routes": [
+          "st:1_100347",
+          "st:1_100104",
+          "st:1_100162",
+          "st:1_100133",
+          "st:1_102554",
+          "st:1_100136"
+        ]
+      },
+      {
+        "nickname": "South Entrance",
+        "stopId": "st:1_67022",
+        "routes": [
+          "st:1_100104",
+          "st:1_100133",
+          "st:1_102554",
+          "st:1_100136"
+        ]
+      },
+      {
+        "nickname": "Parking Garage",
+        "stopId": "st:1_72984",
+        "routes": [
+          "st:1_100113",
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
+        ]
+      },
+      {
+        "nickname": "Parking Garage",
+        "stopId": "st:1_72983",
+        "routes": [
+          "st:1_100113",
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
+        ]
+      }
+    ]
+  },
   "Earl": {
     "name": "Earl",
     "location": "U Building",
@@ -46,50 +101,6 @@
   "Nickels": {
     "name": "Nickels",
     "location": "L Building",
-    "stops": []
-  },
-  "98:3D:AE:65:17:40": {
-    "name": "Constantine",
-    "location": "Library",
-    "stops": [
-      {
-        "nickname": "Main Entrance",
-        "stopId": "st:1_68582",
-        "routes": [
-          "st:1_100113",
-          "st:1_102752",
-          "st:1_102552",
-          "st:1_100136",
-          "st:1_100162"
-        ]
-      },
-      {
-        "nickname": "Parking Garage",
-        "stopId": "st:1_72984",
-        "routes": [
-          "st:1_100113",
-          "st:1_102752",
-          "st:1_102552",
-          "st:1_100136",
-          "st:1_100162"
-        ]
-      },
-      {
-        "nickname": "Parking Garage",
-        "stopId": "st:1_72983",
-        "routes": [
-          "st:1_100113",
-          "st:1_102752",
-          "st:1_102552",
-          "st:1_100136",
-          "st:1_100162"
-        ]
-      }
-    ]
-  },
-  "Balducci": {
-    "name": "Balducci",
-    "location": "Cafeteria",
     "stops": []
   }
 }
