@@ -1,0 +1,22 @@
+{
+  "name": "Transit Tracker Firmware",
+  "version": "v1.0",
+  "home_assistant_domain": "esphome",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP32-S3",
+      "parts": [
+        {
+          "path": "https://bcsustainability.github.io/firmware/firmware.factory.bin",
+          "offset": 0
+        }
+      ],
+      "ota": {
+        "md5": "7581ae20331564335b208f901e22674f",
+        "path": "https://bcsustainability.github.io/firmware/firmware.ota.bin",
+        "release_url": "https://github.com/bcsustainability/bcsustainability.github.io/releases/tag/v1.0"
+      }
+    }
+  ]
+}
