@@ -91,9 +91,9 @@
       }
     ]
   },
-  "Earl": {
+  "28:37:2F:E0:FE:A4": {
     "name": "Earl",
-    "location": "U Building",
+    "location": "L Building",
     "stops": [
       {
         "nickname": "Main Entrance",
@@ -132,12 +132,12 @@
   },
   "Ellis": {
     "name": "Ellis",
-    "location": "T Building",
+    "location": "N Building",
     "stops": []
   },
-  "Nickels": {
+  "28:37:2F:E0:BB:18": {
     "name": "Nickels",
-    "location": "L Building",
+    "location": "U Building",
     "stops": []
   }
 }
