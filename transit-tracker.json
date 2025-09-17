@@ -138,6 +138,37 @@
   "28:37:2F:E0:BB:18": {
     "name": "Nickels",
     "location": "U Building",
-    "stops": []
+    "stops": [
+      {
+        "nickname": "Main Entrance",
+        "stopId": "st:1_68582",
+        "routes": [
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
+        ]
+      },
+      {
+        "nickname": "Parking Garage",
+        "stopId": "st:1_72984",
+        "routes": [
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
+        ]
+      },
+      {
+        "nickname": "Parking Garage",
+        "stopId": "st:1_72983",
+        "routes": [
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100136",
+          "st:1_100162"
+        ]
+      }
+    ]
   }
 }
