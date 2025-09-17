@@ -1,10 +1,73 @@
 {
-  "98:3D:AE:65:17:40": {
+  "Balducci": {
     "name": "Balducci",
     "location": "Cafeteria",
-    "stops": []
+    "stops": [
+      {
+        "nickname": "Parking Garage",
+        "stopId": "st:1_72984",
+        "routes": [
+          "st:1_102752",
+          "st:1_100136",
+          "st:1_100162",
+          "st:1_102552"
+        ]
+      },
+      {
+        "nickname": "Parking Garage",
+        "stopId": "st:1_72984",
+        "routes": [
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100162",
+          "st:1_100136"
+        ]
+      },
+      {
+        "nickname": "South Entrance",
+        "stopId": "st:1_67022",
+        "routes": [
+          "st:1_100104",
+          "st:1_100133"
+        ]
+      },
+      {
+        "nickname": "South Entrance",
+        "stopId": "st:1_79878",
+        "routes": [
+          "st:1_100104",
+          "st:1_100133"
+        ]
+      },
+      {
+        "nickname": "Eastgate Park & Ride - Bay 1",
+        "stopId": "st:1_67014",
+        "routes": [
+          "st:1_100104",
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100133",
+          "st:1_100136",
+          "st:1_100162",
+          "st:1_100347"
+        ]
+      },
+      {
+        "nickname": "Eastgate Park & Ride - Bay 2",
+        "stopId": "st:1_67015",
+        "routes": [
+          "st:1_100104",
+          "st:1_102752",
+          "st:1_102552",
+          "st:1_100133",
+          "st:1_100136",
+          "st:1_100162",
+          "st:1_100347"
+        ]
+      }
+    ]
   },
-  "B4:3A:45:DE:3E:88": {
+  "98:3D:AE:65:17:40": {
     "name": "Constantine",
     "location": "Library",
     "stops": [
